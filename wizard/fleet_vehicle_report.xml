@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="fleet_vehicle_report_form_view" model="ir.ui.view">
+            <field name="name">sr.fleet.vehicle.report.form.view</field>
+            <field name="model">fleet.vehicle.report</field>
+            <field name="arch" type="xml">
+                <form string="Vehicle Report">
+                    <group>
+                        <group>
+                            <field name="start_date"/>
+                        </group>
+                        <group>
+                            <field name="end_date"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="tag_ids" widget="many2many_tags" options="{'no_create_edit': True}" />
+                    </group>
+
+                    <footer>
+                        <button name="action_print" string="Print Report" class="oe_highlight"
+                                type="object"/>
+                        Or
+                        <button string="Cancel" class="btn-default" special="cancel"/>
+                    </footer>
+                </form>
+
+            </field>
+        </record>
+
+        <record id="action_fleet_vehicle_report_wizard" model="ir.actions.act_window">
+            <field name="name">Vehicle Report</field>
+            <field name="res_model">fleet.vehicle.report</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+
+        <menuitem id="menu_fleet_vehicle_report_wizard"
+                  name="Vehicle Report"
+                  action="action_fleet_vehicle_report_wizard"
+                  parent="fleet.menu_fleet_reporting"
+                  sequence="1"/>
+    </data>
+</odoo>
