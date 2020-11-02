@@ -34,8 +34,7 @@ class ReportFleet_vehicle_Temp(models.AbstractModel):
             'doc_ids': data.get('ids'),
             'doc_model': data.get('model'),
             'data': data['form'],
-            'start_date': data['start_date'],
-            'end_date': data['end_date'],
+            'date': data['date'],
         }
         # print "===================docargs",docargs
         # _logger.warning( docargs )

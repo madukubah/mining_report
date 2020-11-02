@@ -12,18 +12,16 @@
                             </center>
                             <center>
                                 <b>
-                                    <span t-esc="start_date"/>
-                                    To
-                                    <span t-esc="end_date"/>
+                                    <span t-esc="date"/>
                                 </b>
                             </center>
                         </div>
                         <br/>
-                        <!-- <t t-foreach="data.keys()" t-as="month">
+                        <t t-foreach="data.keys()" t-as="vehicle_tag_name">
                             <div class="row">
                                 <center>
                                     <b>
-                                        <h4><span t-esc="month"/></h4>
+                                        <h4><span t-esc="vehicle_tag_name"/></h4>
                                     </b>
                                 </center>
                             </div>
@@ -31,38 +29,20 @@
                             <table class="table table-condensed table-striped">
                                 <thead>
                                     <tr>
-                                        <th>Name</th>
-                                        <th class="text-center">Alongside Date</th>
-                                        <th class="text-center">Cast Off Date</th>
-                                        <th class="text-center">Loading Port</th>
-                                        <th class="text-center">Discharging Port</th>
-                                        <th class="text-center">Qty</th>
+                                        <t t-foreach="data[vehicle_tag_name].keys()" t-as="state" >
+                                            <th><span t-esc="state"/></th>
+                                        </t>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr t-foreach="data[month]" t-as="line">
-                                        <td>
-                                            <span t-esc="line['doc_name']"/>
-                                        </td>
-                                        <td class="text-center">
-                                            <span t-esc="line['arrive_date']"/>
-                                        </td>
-                                        <td class="text-center">
-                                            <span t-esc="line['depart_date']"/>
-                                        </td>
-                                        <td class="text-center">
-                                            <span t-esc="line['loading_port']"/>
-                                        </td>
-                                        <td class="text-center">
-                                            <span t-esc="line['discharging_port']"/>
-                                        </td>
-                                        <td class="text-center">
-                                            <span t-esc="'{:,}'.format(line['quantity'])"/>
+                                    <tr >
+                                        <td t-foreach="data[vehicle_tag_name].keys()" t-as="state"  >
+                                            <span t-esc="data[vehicle_tag_name][state]"/>
                                         </td>
                                     </tr>            
                                 </tbody>
                             </table>
-                        </t> -->
+                        </t>
                     
                 </div>
             </div>

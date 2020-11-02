@@ -10,9 +10,12 @@
     ],
     'data': [
         "wizard/fleet_vehicle_report.xml",
+        "wizard/fleet_vehicle_fuel_report.xml",
 
         "report/fleet_vehicle_report.xml",
         "report/fleet_vehicle_temp.xml",
+        "report/fleet_vehicle_fuel_report.xml",
+        "report/fleet_vehicle_fuel_temp.xml",
     ],
     'qweb': [
         # 'static/src/xml/cashback_templates.xml',

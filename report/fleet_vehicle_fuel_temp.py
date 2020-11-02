@@ -19,5 +19,24 @@
 #
 ##############################################################################
 
-from . import fleet_vehicle_temp
-from . import fleet_vehicle_fuel_temp
+import logging
+from odoo import api, fields, models
+
+_logger = logging.getLogger(__name__)
+
+
+class ReportFleet_vehicle_fuel_Temp(models.AbstractModel):
+    _name = 'report.fleet_report.fleet_vehicle_fuel_temp'
+
+    @api.model
+    def render_html(self, docids, data=None):
+        docargs =  {
+            'doc_ids': data.get('ids'),
+            'doc_model': data.get('model'),
+            'data': data['form'],
+            'start_date': data['start_date'],
+            'end_date': data['end_date'],
+        }
+        # print "===================docargs",docargs
+        # _logger.warning( docargs )
+        return self.env['report'].render('fleet_report.fleet_vehicle_fuel_temp', docargs)
