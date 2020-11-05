@@ -34,6 +34,8 @@ class ReportFleet_vehicle_Temp(models.AbstractModel):
             'doc_ids': data.get('ids'),
             'doc_model': data.get('model'),
             'data': data['form'],
+            'tag_total_dict': data['tag_total_dict'],
+            'state_names': data['state_names'],
             'date': data['date'],
         }
         # print "===================docargs",docargs
