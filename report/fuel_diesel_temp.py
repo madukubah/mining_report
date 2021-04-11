@@ -25,8 +25,8 @@ from odoo import api, fields, models
 _logger = logging.getLogger(__name__)
 
 
-class ReportFleet_vehicle_Temp(models.AbstractModel):
-    _name = 'report.fleet_report.fleet_vehicle_temp'
+class ReportFuel_diesel_temp(models.AbstractModel):
+    _name = 'report.mining_fuel_report.fuel_diesel_temp'
 
     @api.model
     def render_html(self, docids, data=None):
@@ -34,10 +34,9 @@ class ReportFleet_vehicle_Temp(models.AbstractModel):
             'doc_ids': data.get('ids'),
             'doc_model': data.get('model'),
             'data': data['form'],
-            'tag_total_dict': data['tag_total_dict'],
-            'state_names': data['state_names'],
-            'date': data['date'],
+            'start_date': data['start_date'],
+            'end_date': data['end_date'],
         }
         # print "===================docargs",docargs
         # _logger.warning( docargs )
-        return self.env['report'].render('fleet_report.fleet_vehicle_temp', docargs)
+        return self.env['report'].render('mining_fuel_report.fuel_diesel_temp', docargs)

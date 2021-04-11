@@ -1,21 +1,22 @@
 # -*- coding: utf-8 -*-
 
 {
-    'name': 'Fleet Report',
+    'name': 'Mining Fuel Report',
     'version': '1.0',
     'author': 'Technoindo.com',
-    'category': 'Fleet Management',
+    'category': 'Mining Management',
     'depends': [
-        'fleet',
+        'mining_production',
     ],
     'data': [
-        "wizard/fleet_vehicle_report.xml",
-        "wizard/fleet_vehicle_fuel_report.xml",
+        "wizard/fuel_diesel_report.xml",
+        # "wizard/fleet_vehicle_fuel_report.xml",
 
-        "report/fleet_vehicle_report.xml",
-        "report/fleet_vehicle_temp.xml",
-        "report/fleet_vehicle_fuel_report.xml",
-        "report/fleet_vehicle_fuel_temp.xml",
+        "report/fuel_diesel_report.xml",
+        "report/fuel_diesel_temp.xml",
+
+        # "report/fleet_vehicle_fuel_report.xml",
+        # "report/fleet_vehicle_fuel_temp.xml",
     ],
     'qweb': [
         # 'static/src/xml/cashback_templates.xml',
