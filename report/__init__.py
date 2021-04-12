@@ -20,4 +20,4 @@
 ##############################################################################
 
 from . import fuel_diesel_temp
-# from . import fleet_vehicle_fuel_temp
+from . import fuel_petrol_temp

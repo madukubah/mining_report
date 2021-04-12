@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        <record id="fleet_vehicle_fuel_report_form_view" model="ir.ui.view">
-            <field name="name">sr.fleet.vehicle.fuel.report.form.view</field>
-            <field name="model">fleet.vehicle.fuel.report</field>
+        <record id="fuel_petrol_report_form_view" model="ir.ui.view">
+            <field name="name">sr.fuel.petrol.report.form.view</field>
+            <field name="model">fuel.petrol.report</field>
             <field name="arch" type="xml">
-                <form string="Vehicle Fuel Report">
+                <form string="Petrol Compumtion Report">
                     <group>
                         <group>
                             <field name="start_date"/>
@@ -15,7 +15,7 @@
                         </group>
                     </group>
                     <group>
-                        <field name="tag_ids" widget="many2many_tags" options="{'no_create_edit': True}" />
+                        <field name="product_id"/>
                     </group>
 
                     <footer>
@@ -29,18 +29,19 @@
             </field>
         </record>
 
-        <record id="action_fleet_vehicle_fuel_report_wizard" model="ir.actions.act_window">
-            <field name="name">Vehicle Fuel Report</field>
-            <field name="res_model">fleet.vehicle.fuel.report</field>
+        <record id="action_fuel_petrol_report_wizard" model="ir.actions.act_window">
+            <field name="name">Petrol Compumtion Report</field>
+            <field name="res_model">fuel.petrol.report</field>
             <field name="view_type">form</field>
             <field name="view_mode">form</field>
             <field name="target">new</field>
         </record>
 
-        <menuitem id="menu_fleet_vehicle_fuel_report_wizard"
-                  name="Vehicle Fuel Report"
-                  action="action_fleet_vehicle_fuel_report_wizard"
-                  parent="fleet.menu_fleet_reporting"
-                  sequence="1"/>
+
+        <menuitem id="menu_fuel_petrol_report_wizard"
+                  name="Petrol Compumtion Report"
+                  action="action_fuel_petrol_report_wizard"
+                  parent="report_fuel_heading"
+                  sequence="99"/>
     </data>
 </odoo>

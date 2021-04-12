@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <report
+                id="action_fuel_petrol_report_wise"
+                string="Petrol Fuel Report"
+                model="fuel.petrol.report"
+                report_type="qweb-pdf"
+                file="mining_fuel_report.fuel_petrol_temp"
+                name="mining_fuel_report.fuel_petrol_temp"
+        />
+    </data>
+</odoo>

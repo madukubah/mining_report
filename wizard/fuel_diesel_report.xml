@@ -37,10 +37,12 @@
             <field name="target">new</field>
         </record>
 
+        <menuitem id="report_fuel_heading" name="Fuel" parent="mining_production.mining_production_report" sequence="3"/>
+
         <menuitem id="menu_fuel_diesel_report_wizard"
                   name="Diesel Compumtion Report"
                   action="action_fuel_diesel_report_wizard"
-                  parent="mining_production.mining_production_report"
+                  parent="report_fuel_heading"
                   sequence="99"/>
     </data>
 </odoo>

@@ -136,7 +136,7 @@
                         <br/>
                         <table style="text-align: left;" >
                             <tbody>
-                                <tr style="font-weight: bold;background-color: yellow;" >
+                                <!-- <tr style="font-weight: bold;background-color: yellow;" >
                                     <td class="text-left" style="width:20%" >
                                         Start Stock
                                     </td>
@@ -146,8 +146,7 @@
                                     <td class="text-left" style="width:20%" >
                                         <span t-esc="'{:,}'.format( data['stock_on_end_date'] + data['consumtion'] )"/>
                                     </td>
-                                </tr>    
-                                
+                                </tr>     -->
                                 <tr style="font-weight: bold;background-color: yellow;" >
                                     <td class="text-left">
                                         Cunsumption
