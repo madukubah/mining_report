@@ -19,6 +19,25 @@
 #
 ##############################################################################
 
-from . import fuel_diesel_temp
-from . import fuel_petrol_temp
-from . import oil_temp
+import logging
+from odoo import api, fields, models
+
+_logger = logging.getLogger(__name__)
+
+
+class ReportOil_temp(models.AbstractModel):
+    _name = 'report.mining_fuel_report.oil_temp'
+
+    @api.model
+    def render_html(self, docids, data=None):
+        docargs =  {
+            'doc_ids': data.get('ids'),
+            'doc_model': data.get('model'),
+            'data': data['form'],
+            'product_dict': data['product_dict'],
+            'start_date': data['start_date'],
+            'end_date': data['end_date'],
+        }
+        # print "===================docargs",docargs
+        # _logger.warning( docargs )
+        return self.env['report'].render('mining_fuel_report.oil_temp', docargs)

@@ -3,7 +3,7 @@
     <data>
         <report
                 id="action_fuel_petrol_report_wise"
-                string="Petrol Fuel Report"
+                string="Petrol Consumption Report"
                 model="fuel.petrol.report"
                 report_type="qweb-pdf"
                 file="mining_fuel_report.fuel_petrol_temp"

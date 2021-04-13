@@ -92,6 +92,7 @@ class FuelDieselReport(models.TransientModel):
         final_dict["stock_on_start_date"] = self.product_id.with_context({'to_date': self.start_date }).qty_available
         final_dict["stock_on_end_date"] = self.product_id.with_context({'to_date': self.end_date }).qty_available
         final_dict["consumtion"] = sum( [ y["product_uom_qty"] for x, y in stype_vehicle_cost_dict.items() ] + [ y["product_uom_qty"] for x, y in tag_log_dict.items() ] )
+        final_dict["total_amount"] = sum( [ y["total_amount"] for x, y in stype_vehicle_cost_dict.items() ] + [ y["total_amount"] for x, y in tag_log_dict.items() ] )
 
 
         datas = {

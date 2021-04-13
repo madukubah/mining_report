@@ -7,15 +7,71 @@ import calendar
 import logging
 _logger = logging.getLogger(__name__)
 
-class FuelPetrolReport(models.TransientModel):
-    _name = 'fuel.petrol.report'
+class OilReport(models.TransientModel):
+    _name = 'oil.report'
 
     start_date = fields.Date('Start Date', required=True)
     end_date = fields.Date(string="End Date", required=True)
-    product_id = fields.Many2one('product.product', 'Fuel', default=4699, readonly=True )
+    category_id = fields.Many2one('product.category', 'Category', default=13, readonly=True )
     
     @api.multi
     def action_print(self):
+        tag_ids = self.env['production.cop.tag'].search( [] )
+        tag_ids = tag_ids.ids
+        service_types = self.env['fleet.service.type'].search([ ( 'tag_id', 'in', tag_ids ) ])
+        stag_ids = [ service_type.tag_id.id for service_type in service_types ]
+
+        tag_ids = [ x for x in tag_ids if x not in stag_ids ]
+
+        product_ids = self.env['product.product'].search( [ ("categ_id", "=", self.category_id.id ) ] )
+        product_dict = {}
+        for product_id in product_ids:
+            product_dict[ product_id.name ] = {
+                "product_uom_qty" : 0,
+                "total_amount" : 0,
+                "stock_on_end_date" : product_id.with_context({'to_date': self.end_date }).qty_available,
+            }
+
+        vehicle_costs = self.env['fleet.vehicle.log.services'].search( [ ( "date", ">=", self.start_date ), ( "date", "<=", self.end_date ), ( "product_id", "in", product_ids.ids ), ( "state", "=", "posted" )  ], order="date asc" )
+        rows = []
+        for vehicle_cost in vehicle_costs:
+            temp = {}
+            temp["date"] = vehicle_cost.date
+            temp["remarks"] = vehicle_cost.vehicle_id.name
+            driver_name = vehicle_cost.purchaser_id.name if vehicle_cost.purchaser_id else ""
+            if driver_name.find("[") != -1:
+                driver_name = driver_name[0: int( driver_name.find("[") ) ]
+            temp["receiver"] = driver_name
+            for product_id in product_ids:
+                temp[ product_id.name ] =  0
+            if vehicle_cost.product_id :
+                temp[ vehicle_cost.product_id.name ] = vehicle_cost.product_uom_qty
+                temp[ "amount" ] = vehicle_cost.amount
+                product_dict[ vehicle_cost.product_id.name ]["product_uom_qty"] += vehicle_cost.product_uom_qty
+                product_dict[ vehicle_cost.product_id.name ]["total_amount"] += vehicle_cost.amount
+
+            rows += [ temp ]
+
+
+        final_dict = {
+            "rows":rows,
+            "product_uom_qty": 0,
+            "total_amount": 0,
+            "consumtion":0,
+            "stock_on_end_date":0,
+        }
+        datas = {
+            'ids': self.ids,
+            'model': 'fuel.diesel.report',
+            'form': final_dict,
+            'product_dict': product_dict,
+            'start_date': self.start_date,
+            'end_date': self.end_date,
+        }
+        return self.env['report'].with_context( landscape=True ).get_action(self,'mining_fuel_report.oil_temp', data=datas)
+
+    @api.multi
+    def action_print3(self):
         final_dict = {
             "rows" : [],
             "product_uom_qty" : 0,
@@ -63,7 +119,7 @@ class FuelPetrolReport(models.TransientModel):
 
         datas = {
             'ids': self.ids,
-            'model': 'fuel.petrol.report',
+            'model': 'fuel.diesel.report',
             'form': final_dict,
             'start_date': self.start_date,
             'end_date': self.end_date,

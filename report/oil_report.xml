@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <report
+                id="action_oil_report_wise"
+                string="Oil Consumption Report"
+                model="oil.report"
+                report_type="qweb-pdf"
+                file="mining_fuel_report.oil_temp"
+                name="mining_fuel_report.oil_temp"
+        />
+    </data>
+</odoo>
