@@ -19,6 +19,4 @@
 #
 ##############################################################################
 
-from . import fuel_diesel_temp
-from . import fuel_petrol_temp
-from . import oil_temp
+from . import mining_cost_performance_temp

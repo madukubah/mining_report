@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 {
-    'name': 'Mining Fuel Report',
+    'name': 'Mining Report',
     'version': '1.0',
     'author': 'Technoindo.com',
     'category': 'Mining Management',
@@ -9,17 +9,10 @@
         'mining_production',
     ],
     'data': [
-        "wizard/fuel_diesel_report.xml",
-        "wizard/fuel_petrol_report.xml",
-        "wizard/oil_report.xml",
+        "wizard/mining_cost_performance_report.xml",
 
-        "report/fuel_diesel_report.xml",
-        "report/fuel_diesel_temp.xml",
-        "report/fuel_petrol_report.xml",
-        "report/fuel_petrol_temp.xml",
-        "report/oil_report.xml",
-        "report/oil_temp.xml",
-
+        "report/mining_cost_performance_report.xml",
+        "report/mining_cost_performance_temp.xml",
     ],
     'qweb': [
         # 'static/src/xml/cashback_templates.xml',

@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        <record id="fuel_diesel_report_form_view" model="ir.ui.view">
-            <field name="name">sr.fuel.diesel.report.form.view</field>
-            <field name="model">fuel.diesel.report</field>
+        <record id="mining_cost_performance_report_form_view" model="ir.ui.view">
+            <field name="name">sr.mining.cost.performance.report.form.view</field>
+            <field name="model">mining.cost.performance.report</field>
             <field name="arch" type="xml">
-                <form string="Diesel Compumtion Report">
+                <form string="Mining Cost Performance Report">
                     <group>
                         <group>
                             <field name="start_date"/>
@@ -15,7 +15,7 @@
                         </group>
                     </group>
                     <group>
-                        <field name="product_id"/>
+                        <field name="pit_ids" widget="many2many_tags" />
                     </group>
 
                     <footer>
@@ -25,24 +25,21 @@
                         <button string="Cancel" class="btn-default" special="cancel"/>
                     </footer>
                 </form>
-
             </field>
         </record>
 
-        <record id="action_fuel_diesel_report_wizard" model="ir.actions.act_window">
-            <field name="name">Diesel Compumtion Report</field>
-            <field name="res_model">fuel.diesel.report</field>
+        <record id="action_mining_cost_performance_report_wizard" model="ir.actions.act_window">
+            <field name="name">Mining Cost Performance Report</field>
+            <field name="res_model">mining.cost.performance.report</field>
             <field name="view_type">form</field>
             <field name="view_mode">form</field>
             <field name="target">new</field>
         </record>
 
-        <menuitem id="report_fuel_heading" name="Fuel" parent="mining_production.mining_production_report" sequence="3"/>
-
-        <menuitem id="menu_fuel_diesel_report_wizard"
-                  name="Diesel Compumtion Report"
-                  action="action_fuel_diesel_report_wizard"
-                  parent="report_fuel_heading"
+        <menuitem id="menu_mining_cost_performance_report_wizard"
+                  name="Mining Cost Performance Report"
+                  action="action_mining_cost_performance_report_wizard"
+                  parent="mining_production.report_production_heading"
                   sequence="99"/>
     </data>
 </odoo>
