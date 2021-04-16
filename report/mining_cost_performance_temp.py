@@ -33,10 +33,17 @@ class ReportMining_cost_performance_temp(models.AbstractModel):
             'doc_ids': data.get('ids'),
             'doc_model': data.get('model'),
             'data': data['form'],
+
             'location_names': data['location_names'],
             'locations': data['locations'],
             'c_code_names': data['c_code_names'],
             'c_codes': data['c_codes'],
+
+            'prod_product_names': data['prod_product_names'],
+            '_sr': data['_sr'],
+            'loc_sr': data['loc_sr'],
+            '_cost_p_ton': data['_cost_p_ton'],
+            
             'start_date': data['start_date'],
             'end_date': data['end_date'],
         }

@@ -31,15 +31,30 @@ class MiningCostPerformanceReport(models.TransientModel):
         stag_ids = [ service_type.tag_id.id for service_type in service_types ]
 
         production_config = self._default_config()
+        main_product_names = [ production_config.main_product_id.name ] 
+        main_product_qty = 0
+        waste_product_names = [ x.name for x in production_config.waste_product_ids ]
+        waste_product_qty = 0
+
+        prod_product_names = [ production_config.main_product_id.name ] 
+        prod_product_names += [ x.name for x in production_config.waste_product_ids ]
+        prod_product_names += [ x.name for x in production_config.product_ids if x.name not in prod_product_names ]
+        prod_product_names += [ x.name for x in production_config.other_product_ids if x.name not in prod_product_names ]
+
+
+        product_ids = [ production_config.main_product_id.id ]
+        product_ids += [ x.id for x in production_config.waste_product_ids ]
+        product_ids += [ x.id for x in production_config.product_ids if x.id not in product_ids ]
+        product_ids += [ x.id for x in production_config.other_product_ids if x.id not in product_ids ]
+        
+        
         config_tag_ids = [ 
             production_config.rit_tag_id.id, 
             production_config.hm_tag_id.id, 
             production_config.wt_tag_id.id,
             ]
 
-        _logger.warning( config_tag_ids )
         stag_ids += config_tag_ids
-        _logger.warning( stag_ids )
         tag_ids = [ x for x in tag_ids if x not in stag_ids ]
         # End separate vehicle cost and tag log
         request = ("select COALESCE(data.cost_code, 'OTHER') as cost_code , COALESCE(data.location, 'OTHER') as location, SUM( base.cost_per_value * data.value ) as amount, SUM(base.amount) as total_amount" +\
@@ -95,6 +110,7 @@ class MiningCostPerformanceReport(models.TransientModel):
         pit_names = [ pit_id.location_id.name for pit_id in pit_ids ]
         cost_code_ids = self.env['production.cost.code'].search( [ ] )
 
+        # _logger.warning( [ pit_id.location_id.id for pit_id in pit_ids ] ) 
         c_codes =  [ cost_code_id.name for cost_code_id in cost_code_ids ]
         c_codes += [ "OTHER" ]
 
@@ -112,7 +128,7 @@ class MiningCostPerformanceReport(models.TransientModel):
         for cost_code_id in cost_code_ids :
             location_c_code_dict[ 'OTHER' ][ cost_code_id.name ] = 0
         location_c_code_dict['OTHER']['OTHER'] = 0
-
+        
         for cost_per_location in cost_per_locations :
             c_code = cost_per_location["cost_code"]
             location = cost_per_location["location"]
@@ -140,7 +156,6 @@ class MiningCostPerformanceReport(models.TransientModel):
                 location_names[ location ] = cost_per_location["amount"]
         locations += [ 'OTHER' ]
 
-        _logger.warning( "("+','.join( [ str(x) for x in tag_ids ] ) + ")" )
         # COP TAG LOG
         request = "select SUM(amount) as total_amount from production_cop_tag_log where "
         if tag_ids :
@@ -155,15 +170,90 @@ class MiningCostPerformanceReport(models.TransientModel):
             c_code_names[ "OTHER" ] += tag_log["total_amount"]
             location_names[ "OTHER" ] += tag_log["total_amount"]
 
-        final_dict = location_c_code_dict
+        request = "select loc.name as location, pr_tmpl.name as product, sum(rit.product_uom_qty) as total_tonnage "
+        request += "from production_ritase_order rit " +\
+                    "inner join stock_location loc on loc.id = rit.location_id " +\
+                    "inner join product_product prod on prod.id = rit.product_id " +\
+                    "inner join product_template pr_tmpl on pr_tmpl.id = prod.product_tmpl_id " +\
+                    "where date BETWEEN '"+self.start_date+"' AND '"+self.end_date+"' "
+        
+        if pit_ids :
+            request += " AND rit.location_id in " + "("+','.join( [ str( pit_id.location_id.id ) for pit_id in pit_ids ] ) + ") "
+        if product_ids :
+            request += " AND rit.product_id in " + "("+','.join( [ str( product_id ) for product_id in product_ids ] ) + ") "
+        request += "group by loc.name, pr_tmpl.name"
+        
+        self.env.cr.execute( request )
+        productions = self.env.cr.dictfetchall()
+        location_production_dict = {}
+        prod_location_names = []
+        # prod_location = {}
+        
+        prod_product = {}
+        for product_name in prod_product_names :
+            prod_product[ product_name ] = 0
+
+        for production in productions :
+            location = production["location"]
+            product = production["product"]
+            if location_production_dict.get( location, False ) :
+                location_production_dict[ location ][ product ] += production["total_tonnage"]
+            else:
+                prod_location_names+= [ location ]
+                location_production_dict[ location ] = {}
+                for product_name in prod_product_names :
+                    location_production_dict[ location ][ product_name ] = 0
+                location_production_dict[ location ][ product ] += production["total_tonnage"]
+            prod_product[ product ] += production["total_tonnage"]
+            if product in main_product_names : main_product_qty += production["total_tonnage"]
+            if product in waste_product_names : waste_product_qty += production["total_tonnage"]
+
+        _sr = ( waste_product_qty / main_product_qty ) if main_product_qty else 0
+
+        _l_by_cost = [ location for location in prod_location_names if location not in locations ]
+        for location in _l_by_cost :
+            location_c_code_dict[ location ] = {}
+            for cost_code_id in cost_code_ids :
+                    location_c_code_dict[ location ][ cost_code_id.name ] = 0
+        locations = _l_by_cost + locations
+
+        _l_by_prod = [ location for location in locations if location not in prod_location_names ]
+        for location in _l_by_prod :
+            location_production_dict[ location ] = {}
+            for product_name in prod_product_names :
+                location_production_dict[ location ][ product_name ] = 0
+        prod_location_names += _l_by_prod
+
+        loc_sr = {}
+        for location in locations :
+            loc_sr[ location ] = {"main" : 0, "waste" : 0, "sr" : 0 }
+            for main_product in main_product_names :
+                loc_sr[ location ]["main"] += location_production_dict[ location ][ main_product ]
+            for waste_product in waste_product_names :
+                loc_sr[ location ]["waste"] += location_production_dict[ location ][ waste_product ]
+
+            loc_sr[ location ]['sr'] = loc_sr[ location ]["waste"]/loc_sr[ location ]["main"] if loc_sr[ location ]["main"] else 0
+
+        _cost_p_ton = sum( [ c_code_names[ c_code ] for c_code in c_codes ] ) / main_product_qty if main_product_qty else 0
+
+        final_dict = {}
+        final_dict["location_c_code_dict"] = location_c_code_dict
+        final_dict["location_production_dict"] = location_production_dict
         datas = {
             'ids': self.ids,
             'model': 'fuel.diesel.report',
             'form': final_dict,
+
             'location_names': location_names,
             'locations': locations,
             'c_code_names': c_code_names,
             'c_codes': c_codes,
+
+            'prod_product_names': prod_product_names,
+            'loc_sr': loc_sr,
+            '_sr': _sr,
+            '_cost_p_ton': _cost_p_ton,
+
             'start_date': self.start_date,
             'end_date': self.end_date,
         }
