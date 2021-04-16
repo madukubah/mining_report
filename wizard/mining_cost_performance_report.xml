@@ -14,9 +14,9 @@
                             <field name="end_date"/>
                         </group>
                     </group>
-                    <group>
+                    <!-- <group>
                         <field name="pit_ids" widget="many2many_tags" />
-                    </group>
+                    </group> -->
 
                     <footer>
                         <button name="action_print" string="Print Report" class="oe_highlight"

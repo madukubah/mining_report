@@ -36,14 +36,17 @@ class MiningCostPerformanceReport(models.TransientModel):
             production_config.hm_tag_id.id, 
             production_config.wt_tag_id.id,
             ]
+
+        _logger.warning( config_tag_ids )
         stag_ids += config_tag_ids
+        _logger.warning( stag_ids )
         tag_ids = [ x for x in tag_ids if x not in stag_ids ]
         # End separate vehicle cost and tag log
         request = ("select COALESCE(data.cost_code, 'OTHER') as cost_code , COALESCE(data.location, 'OTHER') as location, SUM( base.cost_per_value * data.value ) as amount, SUM(base.amount) as total_amount" +\
                     " from (( select fl.name as vehicle, cc.name as cost_code, loc.name as location, SUM(hm.value) as value" +\
                     "		from ( " +\
                     "			select * from production_vehicle_hourmeter_log " +\
-                    "			where date BETWEEN '"+self.start_date+"' AND '"+self.end_date+"') hm " +\
+                    "			where state='posted' AND date BETWEEN '"+self.start_date+"' AND '"+self.end_date+"') hm " +\
                     "		inner join fleet_vehicle fl on fl.id = hm.vehicle_id " +\
                     "		inner join production_cost_code cc on cc.id = hm.cost_code_id " +\
                     "		inner join stock_location loc on loc.id = hm.location_id " +\
@@ -51,7 +54,7 @@ class MiningCostPerformanceReport(models.TransientModel):
                     "	( select fl.name as vehicle, cc.name as cost_code, loc.name as location, SUM(rit.minutes) as value " +\
                     "		from ( " +\
                     "			select * from production_ritase_counter " +\
-                    "			where date BETWEEN '"+self.start_date+"' AND '"+self.end_date+"') rit " +\
+                    "			where state='posted' AND date BETWEEN '"+self.start_date+"' AND '"+self.end_date+"') rit " +\
                     "		inner join fleet_vehicle fl on fl.id = rit.vehicle_id " +\
                     "		inner join production_cost_code cc on cc.id = rit.cost_code_id " +\
                     "		inner join stock_location loc on loc.id = rit.location_id " +\
@@ -62,19 +65,19 @@ class MiningCostPerformanceReport(models.TransientModel):
                     "	from ((select fl.name as vehicle, SUM(hm.value) as value, SUM(hm.amount) as amount " +\
                     "			from (" +\
                     "				select * from production_vehicle_hourmeter_log " +\
-                    "				where date BETWEEN '"+self.start_date+"' AND '"+self.end_date+"' ) hm " +\
+                    "				where state='posted' AND date BETWEEN '"+self.start_date+"' AND '"+self.end_date+"' ) hm " +\
                     "			inner join fleet_vehicle fl on fl.id = hm.vehicle_id " +\
                     "			group by fl.name ) UNION " +\
                     "		(select fl.name as vehicle, SUM(rit.minutes) as value, SUM(rit.amount) as amount " +\
                     "			from ( " +\
                     "				select * from production_ritase_counter " +\
-                    "				where date BETWEEN '"+self.start_date+"' AND '"+self.end_date+"' ) rit " +\
+                    "				where state='posted' AND date BETWEEN '"+self.start_date+"' AND '"+self.end_date+"' ) rit " +\
                     "			inner join fleet_vehicle fl on fl.id = rit.vehicle_id " +\
                     "			group by fl.name ) UNION " +\
                     "		( select fl.name as vehicle, SUM( 0 ) as value, SUM(vc.amount) as amount " +\
                     "			from (" +\
                     "				select * from fleet_vehicle_cost " +\
-                    "				where date BETWEEN '"+self.start_date+"' AND '"+self.end_date+"' ) vc " +\
+                    "				where state='posted' AND date BETWEEN '"+self.start_date+"' AND '"+self.end_date+"' ) vc " +\
                     "			inner join fleet_vehicle fl on fl.id = vc.vehicle_id " +\
                     "			group by fl.name )) v_cost " +\
                     "	group by v_cost.vehicle " +\
@@ -84,8 +87,6 @@ class MiningCostPerformanceReport(models.TransientModel):
                     "group by data.cost_code, data.location " +\
                     "order by data.cost_code, data.location "
                     )
-        
-        _logger.warning( request )
         self.env.cr.execute(request)
         
         cost_per_locations = self.env.cr.dictfetchall()
@@ -122,7 +123,6 @@ class MiningCostPerformanceReport(models.TransientModel):
                 continue
 
             if location not in pit_names : 
-                _logger.warning( location )
                 location = 'OTHER'
             if location_c_code_dict.get( location, False ):
                 location_c_code_dict[ location ][ c_code ] += cost_per_location["amount"]
@@ -139,6 +139,22 @@ class MiningCostPerformanceReport(models.TransientModel):
                 c_code_names[ c_code ] += cost_per_location["amount"]
                 location_names[ location ] = cost_per_location["amount"]
         locations += [ 'OTHER' ]
+
+        _logger.warning( "("+','.join( [ str(x) for x in tag_ids ] ) + ")" )
+        # COP TAG LOG
+        request = "select SUM(amount) as total_amount from production_cop_tag_log where "
+        if tag_ids :
+            request += "tag_id in " + "("+','.join( [ str(x) for x in tag_ids ] ) + ") AND "
+        request += "state='posted' AND date BETWEEN '"+self.start_date+"' AND '"+self.end_date+"' "
+
+        self.env.cr.execute(request)
+        
+        tag_logs = self.env.cr.dictfetchall()
+        for tag_log in tag_logs :
+            location_c_code_dict['OTHER']['OTHER'] += tag_log["total_amount"]
+            c_code_names[ "OTHER" ] += tag_log["total_amount"]
+            location_names[ "OTHER" ] += tag_log["total_amount"]
+
         final_dict = location_c_code_dict
         datas = {
             'ids': self.ids,
