@@ -162,13 +162,15 @@ class MiningCostPerformanceReport(models.TransientModel):
             request += "tag_id in " + "("+','.join( [ str(x) for x in tag_ids ] ) + ") AND "
         request += "state='posted' AND date BETWEEN '"+self.start_date+"' AND '"+self.end_date+"' "
 
+
         self.env.cr.execute(request)
         
         tag_logs = self.env.cr.dictfetchall()
         for tag_log in tag_logs :
-            location_c_code_dict['OTHER']['OTHER'] += tag_log["total_amount"]
-            c_code_names[ "OTHER" ] += tag_log["total_amount"]
-            location_names[ "OTHER" ] += tag_log["total_amount"]
+            if tag_log["total_amount"] :
+                location_c_code_dict['OTHER']['OTHER'] += tag_log["total_amount"]
+                c_code_names[ "OTHER" ] += tag_log["total_amount"]
+                location_names[ "OTHER" ] += tag_log["total_amount"]
 
         request = "select loc.name as location, pr_tmpl.name as product, sum(rit.product_uom_qty) as total_tonnage "
         request += "from production_ritase_order rit " +\
@@ -215,6 +217,8 @@ class MiningCostPerformanceReport(models.TransientModel):
             location_c_code_dict[ location ] = {}
             for cost_code_id in cost_code_ids :
                     location_c_code_dict[ location ][ cost_code_id.name ] = 0
+            location_c_code_dict[ location ][ "OTHER" ] = 0
+            
         locations = _l_by_cost + locations
 
         _l_by_prod = [ location for location in locations if location not in prod_location_names ]
@@ -226,6 +230,9 @@ class MiningCostPerformanceReport(models.TransientModel):
 
         loc_sr = {}
         for location in locations :
+            if( not location_names.get( location, False ) ):
+                location_names[ location ] = 0
+
             loc_sr[ location ] = {"main" : 0, "waste" : 0, "sr" : 0 }
             for main_product in main_product_names :
                 loc_sr[ location ]["main"] += location_production_dict[ location ][ main_product ]
@@ -235,7 +242,8 @@ class MiningCostPerformanceReport(models.TransientModel):
             loc_sr[ location ]['sr'] = loc_sr[ location ]["waste"]/loc_sr[ location ]["main"] if loc_sr[ location ]["main"] else 0
 
         _cost_p_ton = sum( [ c_code_names[ c_code ] for c_code in c_codes ] ) / main_product_qty if main_product_qty else 0
-
+        
+        
         final_dict = {}
         final_dict["location_c_code_dict"] = location_c_code_dict
         final_dict["location_production_dict"] = location_production_dict
@@ -260,73 +268,4 @@ class MiningCostPerformanceReport(models.TransientModel):
         return self.env['report'].with_context( landscape=True ).get_action(self,'mining_report.mining_cost_performance_temp', data=datas)        
 
 
-    @api.multi
-    def action_print2(self):
-        # separate vehicle cost and tag log
-        tag_ids = self.env['production.cop.tag'].search( [] )
-        tag_ids = tag_ids.ids
-        service_types = self.env['fleet.service.type'].search([ ( 'tag_id', 'in', tag_ids ) ])
-        stag_ids = [ service_type.tag_id.id for service_type in service_types ]
-
-        production_config = _default_config()
-        config_tag_ids = [ 
-            production_config.rit_tag_id.id, 
-            production_config.hm_tag_id.id, 
-            production_config.wt_tag_id.id,
-            ]
-        stag_ids += config_tag_ids
-        tag_ids = [ x for x in tag_ids if x not in stag_ids ]
-        # End separate vehicle cost and tag log
-        vehicle_costs = self.env['fleet.vehicle.cost'].search( [ ( "date", ">=", self.start_date ), ( "date", "<=", self.end_date ), ( "state", "=", "posted" )  ], order="name asc" )
-        tag_logs = self.env['production.cop.tag.log'].search( [ ( "date", ">=", self.start_date ), ( "date", "<=", self.end_date ), ( "tag_id", "in", tag_ids ), ( "state", "=", "posted" )  ], order="date asc" )
-
-        ritase_counter = self.env['production.ritase.counter'].search( [ ( "date", ">=", self.start_date ), ( "date", "<=", self.end_date ), ( "state", "=", "posted" ) ] )
-        hourmeter_log = self.env['production.vehicle.hourmeter.log'].search( [ ( "date", ">=", self.start_date ), ( "date", "<=", self.end_date ), ( "state", "=", "posted" ) ] )
-        watertrucks = self.env['production.watertruck.counter'].search( [ ( "date", ">=", self.start_date ), ( "date", "<=", self.end_date ), ( "state", "=", "posted" )  ] )
-
-        cost_code_ids = self.env['production.cost.code'].search( [ ] )
-        c_code_location_dict = {}
-        for cost_code_id in cost_code_ids:
-            c_code_location_dict[ cost_code_id.name ] = {}
-            for pit_id in pit_ids:
-                location_name = pit_id.location_id.name if pit_id.location_id else "Other"
-                c_code_location_dict[ cost_code_id.name ][ location_name ] = { "value":0,"amount":0,}
-            c_code_location_dict[ cost_code_id.name ][ "Other" ] = {"value":0,"amount":0,}
-        c_code_location_dict[ "Other" ] = {}
-        for pit_id in pit_ids:
-            location_name = pit_id.location_id.name if pit_id.location_id else "Other"
-            c_code_location_dict[ "Other" ][ location_name ] = {"value":0,"amount":0,}
-        c_code_location_dict[ "Other" ][ "Other" ] = {"value":0,"amount":0,}
-        
-        
-        vehicle_ids = self.env['fleet.vehicle'].search( [ ] )
-        vehicle_cost_dict = {}
-        for vehicle_id in vehicle_ids:
-            temp = {}
-            temp[ "name" ] = vehicle_id.name
-            for cost_code_id in cost_code_ids:
-                temp[ cost_code_id.name ] = {}
-                for pit_id in pit_ids:
-                    location_name = pit_id.location_id.name if pit_id.location_id else "Other"
-                    temp[ cost_code_id.name ][ location_name ] = { "value":0,"amount":0,}
-                temp[ cost_code_id.name ][ "Other" ] = { "value":0,"amount":0,}
-            temp[ "Other" ] = {}
-            for pit_id in pit_ids:
-                location_name = pit_id.location_id.name if pit_id.location_id else "Other"
-                temp[ "Other" ][ location_name ] = {"value":0,"amount":0,}
-            temp[ "Other" ][ "Other" ] = {"value":0,"amount":0,}
-            
-            temp[ "total_working_value" ] = 0
-            temp[ "total_working_cost" ] = 0
-            vehicle_cost_dict[ vehicle_id.name ] = temp
-
-        final_dict = {}
-        datas = {
-            'ids': self.ids,
-            'model': 'fuel.diesel.report',
-            'form': final_dict,
-            'start_date': self.start_date,
-            'end_date': self.end_date,
-        }
-        return self.env['report'].with_context( landscape=True ).get_action(self,'mining_report.mining_cost_performance_temp', data=datas)
-        
+    
