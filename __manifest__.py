@@ -10,9 +10,12 @@
     ],
     'data': [
         "wizard/mining_cost_performance_report.xml",
+        "wizard/vehicle_log_report.xml",
 
         "report/mining_cost_performance_report.xml",
         "report/mining_cost_performance_temp.xml",
+        "report/vehicle_log_report.xml",
+        "report/vehicle_log_report_temp.xml",
     ],
     'qweb': [
         # 'static/src/xml/cashback_templates.xml',

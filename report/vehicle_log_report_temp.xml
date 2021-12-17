@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="vehicle_log_report_temp">
+        <t t-call="report.external_layout">
+            <div class="page" style="font-size: 10px !important; font-family: Rubik;" >
+                <div class="oe_structure" >
+                        <div class="row">
+                            <center>
+                                <b>
+                                    <h4>Vehicle Logs Report</h4>
+                                </b>
+                            </center>
+                            <center>
+                                <b>
+                                    <span t-esc="start_date"/>
+                                    To
+                                    <span t-esc="end_date"/>
+                                </b>
+                            </center>
+                        </div>
+                        <style>
+                            table, th, td {
+                                border: 1px solid black;
+                                border-collapse: collapse;
+                            }
+                            th {
+                                background-color: #f2f2f2;
+                            }
+                        </style>
+                        <br/>
+                        <br/>
+                        
+                        <t t-foreach="data['logs_by_type'].keys()" t-as="type">
+                            <div class="row">
+                                <center>
+                                    <b>
+                                        <span t-esc="type"/>
+                                    </b>
+                                </center>
+                            </div>
+                            <t t-set="_no" t-value="1"/>
+                            <t t-set="total_sum" t-value="0"/>
+                            <table style="text-align: center; width: 100%; " >
+                                <thead>
+                                    <tr>
+                                        <th class="text-center">Date</th>
+                                        <th class="text-center">vehicle</th>
+                                        <th class="text-center">Product</th>
+                                        <th class="text-center">Total Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr t-foreach="data['logs_by_type'][type]['items']" t-as="item" >
+                                        <td class="text-center">
+                                            <span t-esc="item['date']"/>
+                                        </td>
+                                        <td class="text-center">
+                                            <span t-esc="item['vehicle']"/>
+                                        </td>
+                                        <td class="text-center">
+                                            <span t-esc="item['product']"/>
+                                        </td>
+                                        <!-- <td class="text-center">
+                                            <span t-esc="item['product_uom_qty']"/>
+                                        </td> -->
+                                        <td class="text-center">
+                                            <span t-esc="'{:,}'.format( item['price_unit']* item['product_uom_qty'] )"/>
+                                            <t t-set="total_sum" t-value="total_sum + item['price_unit']* item['product_uom_qty'] "/>
+                                        </td>
+                                    </tr>   
+                                    <tr style="font-weight: bold;background-color: yellow" >
+                                        <td class="text-center">
+                                            Total
+                                        </td>
+                                        <td class="text-center">
+                                        </td>
+                                        <td class="text-center">
+                                        </td>
+                                        <td class="text-center">
+                                            <span t-esc="'{:,}'.format( total_sum )"/>
+                                        </td>
+                                    </tr>   
+                                </tbody>
+                            </table>
+                        </t>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

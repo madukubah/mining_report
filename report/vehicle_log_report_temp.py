@@ -19,5 +19,23 @@
 #
 ##############################################################################
 
-from . import mining_cost_performance_temp
-from . import vehicle_log_report_temp
+import logging
+from odoo import api, fields, models
+
+_logger = logging.getLogger(__name__)
+
+class ReportVehicle_log_report_temp(models.AbstractModel):
+    _name = 'report.mining_report.vehicle_log_report_temp'
+
+    @api.model
+    def render_html(self, docids, data=None):
+        docargs =  {
+            'doc_ids': data.get('ids'),
+            'doc_model': data.get('model'),
+            'data': data['form'],
+            'start_date': data['start_date'],
+            'end_date': data['end_date'],
+        }
+        # print "===================docargs",docargs
+        # _logger.warning( docargs )
+        return self.env['report'].render('mining_report.vehicle_log_report_temp', docargs)

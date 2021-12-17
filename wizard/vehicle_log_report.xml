@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        <record id="mining_cost_performance_report_form_view" model="ir.ui.view">
-            <field name="name">sr.mining.cost.performance.report.form.view</field>
-            <field name="model">mining.cost.performance.report</field>
+        <record id="vehicle_log_report_form_view" model="ir.ui.view">
+            <field name="name">sr.vehicle.log.report.form.view</field>
+            <field name="model">vehicle.log.report</field>
             <field name="arch" type="xml">
-                <form string="Mining Cost Performance Report">
+                <form string="Vehicle Log Report">
                     <group>
                         <group>
                             <field name="start_date"/>
@@ -14,9 +14,9 @@
                             <field name="end_date"/>
                         </group>
                     </group>
-                    <!-- <group>
-                        <field name="pit_ids" widget="many2many_tags" />
-                    </group> -->
+                    <group>
+                        <field name="service_type_ids" widget="many2many_tags" />
+                    </group>
 
                     <footer>
                         <button name="action_print" string="Print Report" class="oe_highlight"
@@ -28,17 +28,17 @@
             </field>
         </record>
 
-        <record id="action_mining_cost_performance_report_wizard" model="ir.actions.act_window">
-            <field name="name">Mining Cost Performance Report</field>
-            <field name="res_model">mining.cost.performance.report</field>
+        <record id="action_vehicle_log_report_wizard" model="ir.actions.act_window">
+            <field name="name">Vehicle Log Report</field>
+            <field name="res_model">vehicle.log.report</field>
             <field name="view_type">form</field>
             <field name="view_mode">form</field>
             <field name="target">new</field>
         </record>
 
-        <menuitem id="menu_mining_cost_performance_report_wizard"
-                name="Mining Cost Performance Report"
-                action="action_mining_cost_performance_report_wizard"
+        <menuitem id="menu_vehicle_log_report_wizard"
+                name="Vehicle Log Report"
+                action="action_vehicle_log_report_wizard"
                 parent="mining_production.report_production_heading"
                 groups="mining_production.production_group_user"
                 sequence="99"/>
