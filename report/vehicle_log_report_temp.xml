@@ -46,7 +46,9 @@
                                         <th class="text-center">Date</th>
                                         <th class="text-center">vehicle</th>
                                         <th class="text-center">Product</th>
-                                        <th class="text-center">Total Amount</th>
+                                        <th class="text-center">Price Unit</th>
+                                        <th class="text-center">Quantity</th>
+                                        <th class="text-center">Amount</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -60,9 +62,12 @@
                                         <td class="text-center">
                                             <span t-esc="item['product']"/>
                                         </td>
-                                        <!-- <td class="text-center">
+                                        <td class="text-center">
+                                            <span t-esc="item['price_unit']"/>
+                                        </td>
+                                        <td class="text-center">
                                             <span t-esc="item['product_uom_qty']"/>
-                                        </td> -->
+                                        </td>
                                         <td class="text-center">
                                             <span t-esc="'{:,}'.format( item['price_unit']* item['product_uom_qty'] )"/>
                                             <t t-set="total_sum" t-value="total_sum + item['price_unit']* item['product_uom_qty'] "/>
@@ -71,6 +76,10 @@
                                     <tr style="font-weight: bold;background-color: yellow" >
                                         <td class="text-center">
                                             Total
+                                        </td>
+                                        <td class="text-center">
+                                        </td>
+                                        <td class="text-center">
                                         </td>
                                         <td class="text-center">
                                         </td>
